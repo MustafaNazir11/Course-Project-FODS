@@ -4,46 +4,78 @@
 #include <string>
 #include <limits>
 #include <chrono>
+#include <fstream> // for CSV file writing
+
 using namespace std;
 
-struct Player {
+struct Player
+{
     string name;
     int score;
 };
 
+// ===================== File Handling =====================
+void saveToCSV(const vector<Player> &lb, const string &algoName)
+{
+    ofstream file("leaderboard.csv");
+    if (!file)
+    {
+        cout << " Error: Could not open leaderboard.csv\n";
+        return;
+    }
+    file << "Rank,Name,Score,Algorithm\n";
+    for (int i = 0; i < lb.size(); i++)
+    {
+        file << i + 1 << "," << lb[i].name << "," << lb[i].score << "," << algoName << "\n";
+    }
+    file.close();
+    cout << " Leaderboard saved to 'leaderboard.csv' (open in Excel)\n";
+}
+
 // ===================== Display Function =====================
-void displayLeaderboard(const vector<Player>& lb, const string& algoName, double timeTaken = -1) {
+void displayLeaderboard(const vector<Player> &lb, const string &algoName, double timeTaken = -1)
+{
     cout << "\n==============================\n";
     cout << "   " << algoName << " LEADERBOARD\n";
     cout << "==============================\n";
     cout << left << setw(6) << "Rank" << setw(20) << "Name" << setw(10) << "Score" << endl;
     cout << "------------------------------\n";
-    for (int i = 0; i < lb.size(); i++) {
+    for (int i = 0; i < lb.size(); i++)
+    {
         cout << left << setw(6) << i + 1
              << setw(20) << lb[i].name
              << setw(10) << lb[i].score << endl;
     }
     cout << "==============================\n";
     if (timeTaken >= 0)
+    {
         cout << "Time taken: " << fixed << setprecision(3) << timeTaken << " ms\n";
+    }
+    saveToCSV(lb, algoName);
 }
 
 // ===================== Sorting Algorithms =====================
-void bubbleSort(vector<Player>& lb) {
+void bubbleSort(vector<Player> &lb)
+{
     int n = lb.size();
-    for (int i = 0; i < n - 1; i++) {
-        for (int j = 0; j < n - i - 1; j++) {
+    for (int i = 0; i < n - 1; i++)
+    {
+        for (int j = 0; j < n - i - 1; j++)
+        {
             if (lb[j].score < lb[j + 1].score)
                 swap(lb[j], lb[j + 1]);
         }
     }
 }
 
-void insertionSort(vector<Player>& lb) {
-    for (int i = 1; i < lb.size(); i++) {
+void insertionSort(vector<Player> &lb)
+{
+    for (int i = 1; i < lb.size(); i++)
+    {
         Player key = lb[i];
         int j = i - 1;
-        while (j >= 0 && lb[j].score < key.score) {
+        while (j >= 0 && lb[j].score < key.score)
+        {
             lb[j + 1] = lb[j];
             j--;
         }
@@ -51,11 +83,14 @@ void insertionSort(vector<Player>& lb) {
     }
 }
 
-void selectionSort(vector<Player>& lb) {
+void selectionSort(vector<Player> &lb)
+{
     int n = lb.size();
-    for (int i = 0; i < n - 1; i++) {
+    for (int i = 0; i < n - 1; i++)
+    {
         int maxIndex = i;
-        for (int j = i + 1; j < n; j++) {
+        for (int j = i + 1; j < n; j++)
+        {
             if (lb[j].score > lb[maxIndex].score)
                 maxIndex = j;
         }
@@ -63,24 +98,32 @@ void selectionSort(vector<Player>& lb) {
     }
 }
 
-void merge(vector<Player>& lb, int left, int mid, int right) {
+void merge(vector<Player> &lb, int left, int mid, int right)
+{
     int n1 = mid - left + 1, n2 = right - mid;
     vector<Player> L(n1), R(n2);
-    for (int i = 0; i < n1; i++) L[i] = lb[left + i];
-    for (int j = 0; j < n2; j++) R[j] = lb[mid + 1 + j];
+    for (int i = 0; i < n1; i++)
+        L[i] = lb[left + i];
+    for (int j = 0; j < n2; j++)
+        R[j] = lb[mid + 1 + j];
     int i = 0, j = 0, k = left;
-    while (i < n1 && j < n2) {
+    while (i < n1 && j < n2)
+    {
         if (L[i].score >= R[j].score)
             lb[k++] = L[i++];
         else
             lb[k++] = R[j++];
     }
-    while (i < n1) lb[k++] = L[i++];
-    while (j < n2) lb[k++] = R[j++];
+    while (i < n1)
+        lb[k++] = L[i++];
+    while (j < n2)
+        lb[k++] = R[j++];
 }
 
-void mergeSort(vector<Player>& lb, int left, int right) {
-    if (left < right) {
+void mergeSort(vector<Player> &lb, int left, int right)
+{
+    if (left < right)
+    {
         int mid = left + (right - left) / 2;
         mergeSort(lb, left, mid);
         mergeSort(lb, mid + 1, right);
@@ -88,11 +131,14 @@ void mergeSort(vector<Player>& lb, int left, int right) {
     }
 }
 
-int partition(vector<Player>& lb, int low, int high) {
+int partition(vector<Player> &lb, int low, int high)
+{
     int pivot = lb[high].score;
     int i = low - 1;
-    for (int j = low; j < high; j++) {
-        if (lb[j].score >= pivot) {
+    for (int j = low; j < high; j++)
+    {
+        if (lb[j].score >= pivot)
+        {
             i++;
             swap(lb[i], lb[j]);
         }
@@ -101,8 +147,10 @@ int partition(vector<Player>& lb, int low, int high) {
     return i + 1;
 }
 
-void quickSort(vector<Player>& lb, int low, int high) {
-    if (low < high) {
+void quickSort(vector<Player> &lb, int low, int high)
+{
+    if (low < high)
+    {
         int pi = partition(lb, low, high);
         quickSort(lb, low, pi - 1);
         quickSort(lb, pi + 1, high);
@@ -110,9 +158,11 @@ void quickSort(vector<Player>& lb, int low, int high) {
 }
 
 // ===================== Duplicate Name Handling =====================
-string generateUniqueName(const string& name, const vector<Player>& lb) {
+string generateUniqueName(const string &name, const vector<Player> &lb)
+{
     int count = 0;
-    for (const auto& p : lb) {
+    for (const auto &p : lb)
+    {
         if (p.name == name || p.name.find(name + " (") == 0)
             count++;
     }
@@ -123,11 +173,13 @@ string generateUniqueName(const string& name, const vector<Player>& lb) {
 }
 
 // ===================== Main =====================
-int main() {
+int main()
+{
     vector<Player> leaderboard;
     int choice;
 
-    while (true) {
+    while (true)
+    {
         cout << "\n===== LEADERBOARD MENU =====\n";
         cout << "1. Add Player\n";
         cout << "2. Show Leaderboard (choose algorithm)\n";
@@ -137,7 +189,8 @@ int main() {
         cin >> choice;
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-        if (choice == 1) {
+        if (choice == 1)
+        {
             Player p;
             cout << "Enter player name: ";
             getline(cin, p.name);
@@ -148,11 +201,15 @@ int main() {
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
             leaderboard.push_back(p);
+            saveToCSV(leaderboard, "Unsorted");
+
             cout << "✅ Player added as: " << p.name << endl;
         }
 
-        else if (choice == 2) {
-            if (leaderboard.empty()) {
+        else if (choice == 2)
+        {
+            if (leaderboard.empty())
+            {
                 cout << "Leaderboard is empty!\n";
                 continue;
             }
@@ -162,25 +219,51 @@ int main() {
             int algo;
             cin >> algo;
 
+            string algoName; // 🔹 store chosen algorithm name
             vector<Player> temp = leaderboard;
             auto start = chrono::high_resolution_clock::now();
 
-            switch (algo) {
-                case 1: bubbleSort(temp); break;
-                case 2: insertionSort(temp); break;
-                case 3: selectionSort(temp); break;
-                case 4: mergeSort(temp, 0, temp.size() - 1); break;
-                case 5: quickSort(temp, 0, temp.size() - 1); break;
-                default: cout << "Invalid choice!\n"; continue;
+            switch (algo)
+            {
+            case 1:
+                algoName = "Bubble Sort";
+                bubbleSort(temp);
+                break;
+            case 2:
+                algoName = "Insertion Sort";
+                insertionSort(temp);
+                break;
+            case 3:
+                algoName = "Selection Sort";
+                selectionSort(temp);
+                break;
+            case 4:
+                algoName = "Merge Sort";
+                mergeSort(temp, 0, temp.size() - 1);
+                break;
+            case 5:
+                algoName = "Quick Sort";
+                quickSort(temp, 0, temp.size() - 1);
+                break;
+            default:
+                cout << "Invalid choice!\n";
+                continue;
             }
 
             auto end = chrono::high_resolution_clock::now();
             double duration = chrono::duration<double, milli>(end - start).count();
-            displayLeaderboard(temp, "Sorted Leaderboard", duration);
+
+            // 🔹 Display sorted leaderboard with algorithm name
+            displayLeaderboard(temp, algoName, duration);
+
+            // 🔹 Save *unsorted* leaderboard with algorithm info
+            saveToCSV(temp, algoName);
         }
 
-        else if (choice == 3) {
-            if (leaderboard.empty()) {
+        else if (choice == 3)
+        {
+            if (leaderboard.empty())
+            {
                 cout << "Leaderboard is empty!\n";
                 continue;
             }
@@ -226,12 +309,14 @@ int main() {
             displayLeaderboard(temp, "Quick Sort", duration);
         }
 
-        else if (choice == 4) {
+        else if (choice == 4)
+        {
             cout << "Exiting... Goodbye!\n";
             break;
         }
 
-        else {
+        else
+        {
             cout << "Invalid option, try again!\n";
         }
     }
